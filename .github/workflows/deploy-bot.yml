@@ -1,0 +1,37 @@
+name: Auto-Deploy WhatsApp Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'  # every 6 hours (UTC)
+
+concurrency:
+  group: whatsapp-bot
+  cancel-in-progress: true
+  
+jobs:
+  deploy-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start bot (temporary run)
+        run: |
+          echo "Starting bot at:"
+          date -u
+          date
+          npm start &
+          BOT_PID=$!
+          sleep 21000   # run for 350 minutes (5 hours & 50 minutes)
+          echo "Stopping bot"
+          kill $BOT_PID || true
